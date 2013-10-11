@@ -1139,7 +1139,8 @@ class LibvirtConfigGuest(LibvirtConfigObject):
 
         if self.virt_type is 'qemu':
             #Add QEMU CLI NS support
-            root = etree.Element("domain", nsmap={'qemu': 'http://libvirt.org/schemas/domain/qemu/1.0'})
+            root = etree.Element("domain", nsmap={
+                'qemu': 'http://libvirt.org/schemas/domain/qemu/1.0'})
         else:
             root = super(LibvirtConfigGuest, self).format_dom()
 
@@ -1320,6 +1321,40 @@ class LibvirtConfigNodeDevicePciSubFunctionCap(LibvirtConfigObject):
 #    t3 = LibvirtConfigGuest()
 #    t3.virt_type = 'kvm'
 #    print(t3.to_xml())
+#
+#    obj = LibvirtConfigGuest()
+#    obj.virt_type = "qemu"
+#    obj.virt_cli_args = ['-mem-path /tmp',
+#                         '-device externalpci,socket=/tmp/socket1',
+#                         '-device externalpci,socket=/tmp/socket2']
+#    obj.memory = 1024 * 1024 * 100
+#    obj.vcpus = 2
+#    obj.cpuset = "0-3,^2,4-5"
+#    obj.cpu_shares = 100
+#    obj.cpu_quota = 50000
+#    obj.cpu_period = 25000
+#    obj.name = "demo"
+#    obj.uuid = "b38a3f43-4be2-4046-897f-b67c2f5e0147"
+#    obj.os_type = "linux"
+#    obj.os_boot_dev = ["hd", "cdrom", "fd"]
+#    obj.os_smbios = LibvirtConfigGuestSMBIOS()
+#    obj.acpi = True
+#    obj.apic = True
+#
+#    obj.sysinfo = LibvirtConfigGuestSysinfo()
+#    obj.sysinfo.bios_vendor = "Acme"
+#    obj.sysinfo.system_version = "1.0.0"
+#
+#    disk = LibvirtConfigGuestDisk()
+#    disk.source_type = "file"
+#    disk.source_path = "/tmp/img"
+#    disk.target_dev = "/dev/vda"
+#    disk.target_bus = "virtio"
+#
+#    obj.add_device(disk)
+#
+#    xml = obj.to_xml()
+#    print(xml)
 #
 #
 #if __name__ == '__main__':

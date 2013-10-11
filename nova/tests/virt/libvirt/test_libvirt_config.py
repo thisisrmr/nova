@@ -56,12 +56,6 @@ class LibvirtConfigTest(LibvirtConfigBaseTest):
         obj.parse_str(inxml)
 
 
-class LibVirtConfigRMRTest(LibvirtConfigBaseTest):
-
-    def test_config_rmr(self):
-        print("test_config_rmr: called!")
-
-
 class LibvirtConfigCapsTest(LibvirtConfigBaseTest):
 
     def test_config_host(self):
@@ -1508,3 +1502,82 @@ class LibvirtConfigNodeDevicePciSubFunctionCap(LibvirtConfigBaseTest):
         self.assertEqual([("0000", "0x0a", "0x1", "0x1"),
                           ("0001", "0x0a", "0x02", "0x03"), ],
                          fun_capability.device_addrs)
+
+
+class LibVirtConfigGuestVirtCliArgs(LibvirtConfigBaseTest):
+
+    def test_config_kvm(self):
+        obj = config.LibvirtConfigGuest()
+        obj.virt_type = "qemu"
+        obj.virt_cli_args = ['-mem-path /tmp',
+                             '-device externalpci,socket=/tmp/socket1',
+                             '-device externalpci,socket=/tmp/socket2']
+        obj.memory = 1024 * 1024 * 100
+        obj.vcpus = 2
+        obj.cpuset = "0-3,^2,4-5"
+        obj.cpu_shares = 100
+        obj.cpu_quota = 50000
+        obj.cpu_period = 25000
+        obj.name = "demo"
+        obj.uuid = "b38a3f43-4be2-4046-897f-b67c2f5e0147"
+        obj.os_type = "linux"
+        obj.os_boot_dev = ["hd", "cdrom", "fd"]
+        obj.os_smbios = config.LibvirtConfigGuestSMBIOS()
+        obj.acpi = True
+        obj.apic = True
+
+        obj.sysinfo = config.LibvirtConfigGuestSysinfo()
+        obj.sysinfo.bios_vendor = "Acme"
+        obj.sysinfo.system_version = "1.0.0"
+
+        disk = config.LibvirtConfigGuestDisk()
+        disk.source_type = "file"
+        disk.source_path = "/tmp/img"
+        disk.target_dev = "/dev/vda"
+        disk.target_bus = "virtio"
+
+        obj.add_device(disk)
+
+        xml = obj.to_xml()
+        self.assertXmlEqual(xml, """
+            <domain xmlns:qemu="http://libvirt.org/schemas/domain/qemu/1.0" type="qemu">
+              <uuid>b38a3f43-4be2-4046-897f-b67c2f5e0147</uuid>
+              <name>demo</name>
+              <memory>104857600</memory>
+              <vcpu cpuset="0-3,^2,4-5">2</vcpu>
+              <sysinfo type="smbios">
+                <bios>
+                  <entry name="vendor">Acme</entry>
+                </bios>
+                <system>
+                  <entry name="version">1.0.0</entry>
+                </system>
+              </sysinfo>
+              <os>
+                <type>linux</type>
+                <boot dev="hd"/>
+                <boot dev="cdrom"/>
+                <boot dev="fd"/>
+                <smbios mode="sysinfo"/>
+              </os>
+              <features>
+                <acpi/>
+                <apic/>
+              </features>
+              <cputune>
+                <shares>100</shares>
+                <quota>50000</quota>
+                <period>25000</period>
+              </cputune>
+              <devices>
+                <disk type="file" device="disk">
+                  <source file="/tmp/img"/>
+                  <target bus="virtio" dev="/dev/vda"/>
+                </disk>
+              </devices>
+              <qemu:commandline>
+                <qemu:arg value="-mem-path /tmp"/>
+                <qemu:arg value="-device externalpci,socket=/tmp/socket1"/>
+                <qemu:arg value="-device externalpci,socket=/tmp/socket2"/>
+              </qemu:commandline>
+            </domain>""")
