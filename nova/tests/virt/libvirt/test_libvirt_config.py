@@ -55,6 +55,10 @@ class LibvirtConfigTest(LibvirtConfigBaseTest):
         obj = config.LibvirtConfigObject(root_name="demo")
         obj.parse_str(inxml)
 
+class LibVirtConfigRMRTest(LibvirtConfigBaseTest):
+
+    def test_config_rmr(self):
+        print("test_config_rmr: called!")
 
 class LibvirtConfigCapsTest(LibvirtConfigBaseTest):
 

@@ -1,7 +1,7 @@
 OpenStack Nova README
 =====================
 
-Testing... :-)
+Testing Testing... :-) :-)
 
 OpenStack Nova provides a cloud computing fabric controller,
 supporting a wide variety of virtualization technologies,
