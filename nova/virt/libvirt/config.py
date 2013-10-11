@@ -1031,6 +1031,7 @@ class LibvirtConfigGuest(LibvirtConfigObject):
                                                  **kwargs)
 
         self.virt_type = None
+        self.virt_cli_args = []
         self.uuid = None
         self.name = None
         self.memory = 1024 * 1024 * 500
@@ -1117,8 +1118,30 @@ class LibvirtConfigGuest(LibvirtConfigObject):
             devices.append(dev.format_dom())
         root.append(devices)
 
+    def _format_virt_cli_args(self, root):
+        if len(self.virt_cli_args) == 0:
+            return
+
+        if self.virt_type is 'qemu':
+            NS = '{http://libvirt.org/schemas/domain/qemu/1.0}'
+            cli = etree.Element(NS + "commandline")
+            for arg in self.virt_cli_args:
+                a = etree.Element(NS + "arg")
+                a.set("value", arg)
+                cli.append(a)
+            root.append(cli)
+
+        else:
+            return
+
     def format_dom(self):
-        root = super(LibvirtConfigGuest, self).format_dom()
+        root = None
+
+        if self.virt_type is 'qemu':
+            #Add QEMU CLI NS support
+            root = etree.Element("domain", nsmap={'qemu': 'http://libvirt.org/schemas/domain/qemu/1.0'})
+        else:
+            root = super(LibvirtConfigGuest, self).format_dom()
 
         root.set("type", self.virt_type)
 
@@ -1138,6 +1161,8 @@ class LibvirtConfigGuest(LibvirtConfigObject):
             root.append(self.cpu.format_dom())
 
         self._format_devices(root)
+
+        self._format_virt_cli_args(root)
 
         return root
 
@@ -1161,6 +1186,10 @@ class LibvirtConfigGuest(LibvirtConfigObject):
 
     def set_clock(self, clk):
         self.clock = clk
+
+    def add_virt_cli_arg(self, arg):
+        #Note: arg must be string
+        self.virt_cli_args.append(arg)
 
 
 class LibvirtConfigGuestSnapshot(LibvirtConfigObject):
@@ -1274,3 +1303,24 @@ class LibvirtConfigNodeDevicePciSubFunctionCap(LibvirtConfigObject):
                                           c.get('bus'),
                                           c.get('slot'),
                                           c.get('function')))
+
+#def main():
+#    top = LibvirtConfigGuest()
+#    top.virt_type = 'qemu'
+#    top.add_virt_cli_arg('-mem-path /tmp')
+#    top.add_virt_cli_arg('-device externalpci,socket=/tmp/socket1')
+#    top.add_virt_cli_arg('-device externalpci,socket=/tmp/socket2')
+#
+#    print(top.to_xml())
+#
+#    t2 = LibvirtConfigGuest()
+#    t2.virt_type = 'qemu'
+#    print(t2.to_xml())
+#
+#    t3 = LibvirtConfigGuest()
+#    t3.virt_type = 'kvm'
+#    print(t3.to_xml())
+#
+#
+#if __name__ == '__main__':
+#    main()
