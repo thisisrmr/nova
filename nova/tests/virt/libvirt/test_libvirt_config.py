@@ -1540,7 +1540,8 @@ class LibVirtConfigGuestVirtCliArgs(LibvirtConfigBaseTest):
 
         xml = obj.to_xml()
         self.assertXmlEqual(xml, """
-            <domain xmlns:qemu="http://libvirt.org/schemas/domain/qemu/1.0" type="qemu">
+            <domain xmlns:qemu="http://libvirt.org/schemas/domain/qemu/1.0"
+                type="qemu">
               <uuid>b38a3f43-4be2-4046-897f-b67c2f5e0147</uuid>
               <name>demo</name>
               <memory>104857600</memory>
